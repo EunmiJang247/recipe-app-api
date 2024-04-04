@@ -6,7 +6,7 @@ on: [push]
 
 jobs:
   test-lint:
-    name: Test and Link
+    name: Test and Lint
     runs-on: ubuntu-20.04
     # 런언 : 우분투에서 실행할 것이다. 우리가 작업하게될 운영체제를 씀. 
     # 스탭1. 도커 허브에 로그인한다 
