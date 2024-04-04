@@ -1,0 +1,9 @@
+프로젝트 생성
+app이라는 프로젝트를 생성하게 된다 
+docker-compose run --rm app sh -c "django-admin startproject app ."
+manage.py가 있는 프로젝트가 생성되었음.
+
+docker-compose up -> 서비스 시작하기. localhost:8000가 실행됨
+
+우리가 깃허브에 Secret에 도커의 코드를 저장했었다
+
