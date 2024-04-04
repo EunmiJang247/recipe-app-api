@@ -7,3 +7,4 @@ docker-compose up -> 서비스 시작하기. localhost:8000가 실행됨
 
 우리가 깃허브에 Secret에 도커의 코드를 저장했었다
 
+깃허브 -> 액션 탭 클릭 -
