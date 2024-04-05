@@ -22,7 +22,7 @@ jobs:
         uses: actions/checkout@v2
       # 스탭3. 테스트하고 
       - name: Test
-        run: docker-compose run --rm app sh -c "python manage.py test"
+        run: docker-compose run --rm app sh -c "python manage.py wait_for_db && python manage.py test"
 
 # docker-compose run --rm app sh -c "python manage.py test" 이거를 
 # 코멘트창에 치고 엔터한다 -> OK나옴. 
