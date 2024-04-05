@@ -28,6 +28,21 @@ class UserAdmin(BaseUserAdmin):
         (_('Important dates'), {'fields': ('last_login',)}),
     )
     readonly_fields = ['last_login']
+    # 어드민에서 유저 신규추가할 때 받을 필드들
+    add_fieldsets = (
+        (None, {
+            # 'classes': ('wide', ),
+            'fields': (
+                'email',
+                'password1',
+                'password2',      
+                'name',    
+                'is_active', 
+                'is_staff', 
+                'is_superuser',        
+            )
+        }),
+    )
 
 
 admin.site.register(models.User, UserAdmin)
