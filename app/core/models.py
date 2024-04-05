@@ -1,3 +1,38 @@
-from django.db import models # noqa
+""" 
+데이터베이스 모델. 
+"""
+from django.db import models
+from django.contrib.auth.models import (
+    AbstractBaseUser,
+    BaseUserManager,
+    PermissionsMixin,
+)
 
-# Create your models here.
+
+# 유저 모델을 만들었으니 유저모델 매니저를 만들어보겠다 
+class UserManager(BaseUserManager): #BaseUserManager : 장고에 의해 구현되어있는 것
+    """ 유저 관리 부분 """
+    def create_user(self, email, password=None, **extra_field):
+        """ 유저생성 """
+        user = self.model(email=email, **extra_fields)
+        user.set_password(password) #암호화된 암호를 저장
+        user.save(using=self._db)
+
+        return user
+
+
+# 모델 추가하겠다
+class User(AbstractBaseUser, PermissionsMixin):
+    # 필드를 정의하겠다
+    # AbstractBaseUser : Auth기능을 가지고있음
+    # PermissionsMixin : 허가해주는 기능을 가지고있음
+    email = models.EmailField(max_length=255, unique=True) # 이메일 필드 정의
+    name = models.CharField(max_length=255) # 네임 필드 정의 
+    is_active = models.BooleanField(default=True)
+    is_staff = models.BooleanField(default=False)
+
+    objects = UserManager() # UserManager 사용할 수 있도록 활성화.
+
+    # 아이디를 email로 사용하게 해줌.
+    USERNAME_FIELD = 'email'
+
