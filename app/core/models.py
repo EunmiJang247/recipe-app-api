@@ -14,8 +14,19 @@ class UserManager(BaseUserManager): #BaseUserManager : 장고에 의해 구현�
     """ 유저 관리 부분 """
     def create_user(self, email, password=None, **extra_fields):
         """ 유저생성 """
-        user = self.model(email=email, **extra_fields)
+        if not email:
+            raise ValueError('User must have an email address.')
+        user = self.model(email=self.normalize_email(email), **extra_fields)
         user.set_password(password) #암호화된 암호를 저장
+        user.save(using=self._db)
+
+        return user
+    
+    def create_superuser(self, email, password):
+        """ 슈퍼유저 생성"""
+        user = self.create_user(email, password)
+        user.is_staff = True
+        user.is_superuser = True
         user.save(using=self._db)
 
         return user
