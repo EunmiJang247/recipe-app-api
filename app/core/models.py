@@ -12,7 +12,7 @@ from django.contrib.auth.models import (
 # 유저 모델을 만들었으니 유저모델 매니저를 만들어보겠다 
 class UserManager(BaseUserManager): #BaseUserManager : 장고에 의해 구현되어있는 것
     """ 유저 관리 부분 """
-    def create_user(self, email, password=None, **extra_field):
+    def create_user(self, email, password=None, **extra_fields):
         """ 유저생성 """
         user = self.model(email=email, **extra_fields)
         user.set_password(password) #암호화된 암호를 저장

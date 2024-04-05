@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'core', #이거를 활성화 해줘야함
+    'core',
 ]
 
 MIDDLEWARE = [
