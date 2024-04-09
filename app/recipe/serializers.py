@@ -24,10 +24,11 @@ class TagSerializer(serializers.ModelSerializer):
 class RecipeSerializer(serializers.ModelSerializer):
     # Tag시리얼라이저랑 잇기 위해 선언
     tags = TagSerializer(many=True, required=False)
+    ingredients = IngredientSerializer(many=True, required=False)
 
     class Meta:
         model = Recipe
-        fields = ['id', 'title', 'time_minutes', 'price', 'link', 'tags']
+        fields = ['id', 'title', 'time_minutes', 'price', 'link', 'tags', 'ingredients']
         read_only_fields = ['id']
 
     def _get_or_create_tags(self, tags, recipe):
@@ -39,23 +40,40 @@ class RecipeSerializer(serializers.ModelSerializer):
             )
             recipe.tags.add(tag_obj)
 
+    def _get_or_create_ingredients(self, ingredients, recipe):
+        auth_user = self.context['request'].user
+        for ingredient in ingredients:
+            ingredient_obj, create = Ingredient.objects.get_or_create(
+                user=auth_user,
+                **ingredient,
+            )
+            recipe.ingredients.add(ingredient_obj)
 
     def create(self, validated_data):
         tags = validated_data.pop('tags', []) #tag에 있는거를 제거하고 tags에 저장.
+        ingredients = validated_data.pop('ingredients', [])
         recipe = Recipe.objects.create(**validated_data)
         # 따로따로 다른 modl에 저장해야 하니까 분리함. 
         self._get_or_create_tags(tags, recipe)
+        self._get_or_create_ingredients(ingredients, recipe)
 
         return recipe
     
     def update(self, instance, validated_data):
         # instance는 업데이트할 모델 객체를 나타냄.
-        # instance : 예전데이터 validated_data: 바꿀데이터
+        # instance : 예전데이터 
+        # validated_data: 바꿀데이터
 
         tags = validated_data.pop('tags', None)
+        ingredients = validated_data.pop('ingredients', None)
+
         if tags is not None:
             instance.tags.clear()
             self._get_or_create_tags(tags, instance)
+
+        if ingredients is not None:
+            instance.ingredients.clear()
+            self._get_or_create_ingredients(ingredients, instance)
 
       
         for attr, value in validated_data.items():

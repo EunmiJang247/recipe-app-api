@@ -38,30 +38,28 @@ class RecipeViewSet(viewsets.ModelViewSet):
         """새로운 레시피 생성"""
         serializer.save(user=self.request.user)
 
-class TagViewSet(mixins.UpdateModelMixin, # 이거 넣었다고 patch가됨
+class BaseRecipeAttrViewSet(mixins.UpdateModelMixin, # 이거 넣었다고 patch가됨
                  mixins.DestroyModelMixin, # 이거 넣었다고 delete가됨
-                 mixins.ListModelMixin, viewsets.GenericViewSet):
+                 mixins.ListModelMixin, 
+                 viewsets.GenericViewSet):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        return self.queryset.filter(user=self.request.user).order_by('-name')
+        #이 줄 때문에 로그인한 사람의 재료만 볼수있는것임.  
+    
+
+class TagViewSet(BaseRecipeAttrViewSet):
     """ DB의 테그를 관리 """
     serializer_class = serializers.TagSerializer
     queryset = Tag.objects.all()
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        return self.queryset.filter(user=self.request.user).order_by('-name')
 
 
-class IngredientViewSet( 
-                mixins.UpdateModelMixin, mixins.DestroyModelMixin,
-                mixins.ListModelMixin, viewsets.GenericViewSet):
+class IngredientViewSet(BaseRecipeAttrViewSet):
     serializer_class = serializers.IngredientSerializer
     queryset = Ingredient.objects.all()
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        return self.queryset.filter(user=self.request.user).order_by('-name')
-        #이 줄 때문에 로그인한 사람의 재료만 볼수있는것임.    
+          
 
 
 
