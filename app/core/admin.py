@@ -45,5 +45,8 @@ class UserAdmin(BaseUserAdmin):
     )
 
 
+# 어드민 화면에서 관리할 모델들을 써넣음!
 admin.site.register(models.User, UserAdmin)
 admin.site.register(models.Recipe)
+admin.site.register(models.Tag)
+admin.site.register(models.Ingredient)

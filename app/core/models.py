@@ -58,6 +58,34 @@ class Recipe(models.Model):
     time_minutes = models.IntegerField()
     price = models.DecimalField(max_digits=5, decimal_places=2)
     link = models.CharField(max_length=255, blank=True)
+    tags = models.ManyToManyField('Tag')
+    Ingredient = models.ManyToManyField('Ingredient')
 
     def __str__(self):
         return self.title
+    
+class Tag(models.Model):
+    """Tag for filtering recipes"""
+    name = models.CharField(max_length=255)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+    )
+
+    def __str__(self):
+        return self.name
+
+class Ingredient(models.Model):
+    name = models.CharField(max_length=255)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        # settings.py에 AUTH_USER_MODEL = 'core.User' 코어모델쓰겠다는뜻
+        on_delete=models.CASCADE,
+    )
+
+    def __str__(self):
+        return self.name 
+    #str(ingredient(Ingredient인스턴스))찍으면 name이 대표로 나옴
+
+
+
