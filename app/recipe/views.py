@@ -52,7 +52,8 @@ class TagViewSet(mixins.UpdateModelMixin, # 이거 넣었다고 patch가됨
 
 
 class IngredientViewSet( 
-                 mixins.ListModelMixin, viewsets.GenericViewSet):
+                mixins.UpdateModelMixin, mixins.DestroyModelMixin,
+                mixins.ListModelMixin, viewsets.GenericViewSet):
     serializer_class = serializers.IngredientSerializer
     queryset = Ingredient.objects.all()
     authentication_classes = [TokenAuthentication]

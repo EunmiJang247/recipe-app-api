@@ -13,7 +13,7 @@ from recipe.serializers import (
     RecipeDetailSerializer,
 )
 
-RECIPE_URL = reverse('recipe:recipe-list')
+RECIPES_URL = reverse('recipe:recipe-list')
 
 
 def detail_url(recipe_id):
@@ -41,7 +41,7 @@ class PublicRecipeAPITests(TestCase):
         self.client = APIClient()
 
     def test_auth_required(self):
-        res = self.client.get(RECIPE_URL)
+        res = self.client.get(RECIPES_URL)
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
@@ -59,7 +59,7 @@ class PrivateRecipeApiTests(TestCase):
         create_recipe(user=self.user)
         create_recipe(user=self.user)
 
-        res = self.client.get(RECIPE_URL)
+        res = self.client.get(RECIPES_URL)
 
         recipes = Recipe.objects.all().order_by('-id')
         serializer = RecipeSerializer(recipes, many=True)
@@ -75,7 +75,7 @@ class PrivateRecipeApiTests(TestCase):
         create_recipe(user=other_user)
         create_recipe(user=self.user)
 
-        res = self.client.get(RECIPE_URL)
+        res = self.client.get(RECIPES_URL)
 
         recipes = Recipe.objects.filter(user = self.user)
         serializer = RecipeSerializer(recipes, many=True)
@@ -98,7 +98,7 @@ class PrivateRecipeApiTests(TestCase):
             'time_minutes': 30,
             'price': Decimal('5.99'),
         }
-        res = self.client.post(RECIPE_URL, payload)
+        res = self.client.post(RECIPES_URL, payload)
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
 
         recipe = Recipe.objects.get(id=res.data['id'])
@@ -185,7 +185,7 @@ class PrivateRecipeApiTests(TestCase):
             'price': Decimal(2.50),
             'tags': [{'name': 'Thai'}, {'name': 'Dinner'}]
         }
-        res = self.client.post(RECIPE_URL, payload, format='json')
+        res = self.client.post(RECIPES_URL, payload, format='json')
 
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
         recipes = Recipe.objects.filter(user=self.user)
@@ -209,7 +209,7 @@ class PrivateRecipeApiTests(TestCase):
             'price': Decimal('4.50'),
             'tags': [{'name': 'Indian'}, {'name': 'Breakfast'}],
         }
-        res = self.client.post(RECIPE_URL, payload, format='json')
+        res = self.client.post(RECIPES_URL, payload, format='json')
 
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
         recipes = Recipe.objects.filter(user=self.user)
@@ -264,7 +264,27 @@ class PrivateRecipeApiTests(TestCase):
         self.assertEqual(recipe.tags.count(), 0)
 
 
-    
+    # def test_create_recipe_with_new_ingredients(self):
+    #     payload = {
+    #         'title': 'Cauliflower Tacos',
+    #         'time_minutes': 30,
+    #         'price': Decimal(4.30),
+    #         'ingredients': [{'name': 'Cauliflower'}, {'name': 'Salt'}],
+    #     }
+    #     res = self.client.post(RECIPES_URL, payload, format='json')
+
+    #     self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+
+    #     recipes = Recipe.objects.filter(user=self.user)
+    #     self.assertEqual(recipes.count(), 1)
+    #     recipe = recipes[0]
+    #     self.assertEqual(recipe.ingredients.count(), 2)
+    #     for ingredient in payload['ingredients']:
+    #         exists = recipe.ingredients.filter(
+    #             name=ingredient['name'],
+    #             user=self.user,
+    #         ).exists()
+    #         self.assertTrue(exists)    
 
 
 

@@ -15,6 +15,10 @@ from recipe.serializers import (
 
 INGREDIENTS_URL = reverse('recipe:ingredient-list') 
 
+# detail ingredient를 위해 아래를 추가함.
+def detail_url(ingredient_id):
+    return reverse('recipe:ingredient-detail', args=[ingredient_id])
+
 
 def create_user(email='user@exmaple.com', password="testpass123"):
     return get_user_model().objects.create_user(email=email, password=password)
@@ -48,7 +52,7 @@ class PrivateIngredientsApiTests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data, serializer.data)
 
-    def test_tags_limited_to_user(self):
+    def test_ingredients_limited_to_user(self):
         user2 = create_user(email='user2@example.com')
         Ingredient.objects.create(user=user2, name='Fruity')
         
@@ -59,3 +63,32 @@ class PrivateIngredientsApiTests(TestCase):
         self.assertEqual(len(res.data), 1)
         self.assertEqual(res.data[0]['name'], ingredient.name)
         self.assertEqual(res.data[0]['id'], ingredient.id)
+
+
+    # 재료 수정하는 기능 테스트
+    def test_update_ingredient(self):
+        ingredient = Ingredient.objects.create(user=self.user, name='Cilantro')
+        # 재료생성
+
+        payload = {'name': 'Coriander'}
+        url = detail_url(ingredient.id)
+        res = self.client.patch(url, payload)
+        # Coriander를 보냄
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        ingredient.refresh_from_db() # db새로고침
+        self.assertEqual(ingredient.name, payload['name'])
+
+
+    # 재료 삭제 테스트
+    # def test_delete_ingredient(self):
+    #     ingredient = Ingredient.objects.create(user=self.user, name='Lettuce')
+
+    #     url = detail_url(ingredient.id)
+    #     res = self.client.delete(url)
+
+    #     self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
+    #     ingredient = Ingredient.objects.filter(user=self.user)
+    #     self.assertFalse(ingredient.exists())
+
+
