@@ -88,5 +88,10 @@ class RecipeDetailSerializer(RecipeSerializer):
         fields = RecipeSerializer.Meta.fields + ['description']
         
 
-
-
+class RecipeImageSerializer(serializers.ModelSerializer):
+    """레시피 생성 시리얼라이저"""
+    class Meta:
+        model=Recipe
+        fields=['id', 'image']
+        read_only_fields = ['id']
+        extra_kwargs = {'image': {'required': 'True'}}

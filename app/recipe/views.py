@@ -1,4 +1,7 @@
-from rest_framework import (viewsets, mixins) #  Django REST Framework에서 viewsets 모듈을 가져옴
+from rest_framework import (viewsets, mixins, status,) #  Django REST Framework에서 viewsets 모듈을 가져옴
+from rest_framework.decorators import action
+from rest_framework.response import Response
+
 from rest_framework.authentication import TokenAuthentication # REST 프레임워크에서 토큰 인증을 사용하기 위해
 from rest_framework.permissions import IsAuthenticated # 인증된 사용자인지 확인하기 위해
 from core.models import (Recipe, Tag, Ingredient) # core 애플리케이션의 Recipe 모델을 가져옴
@@ -31,12 +34,28 @@ class RecipeViewSet(viewsets.ModelViewSet):
         '''
         if self.action == 'list':
             return serializers.RecipeSerializer
+        elif self.action == 'upload_image':
+            return serializers.RecipeImageSerializer
         
         return self.serializer_class
     
     def perform_create(self, serializer):
         """새로운 레시피 생성"""
         serializer.save(user=self.request.user)
+
+    # 이미지 생성 뷰
+    @action(methods=['POST'], detail=True, url_path='upload-image')
+    def upload_image(self, request, pk=None):
+        """이미지 업로드하는 부분"""
+        recipe = self.get_object()
+        serializer = self.get_serializer(recipe, data=request.data)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)        
+
 
 class BaseRecipeAttrViewSet(mixins.UpdateModelMixin, # 이거 넣었다고 patch가됨
                  mixins.DestroyModelMixin, # 이거 넣었다고 delete가됨
