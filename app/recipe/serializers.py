@@ -85,7 +85,8 @@ class RecipeSerializer(serializers.ModelSerializer):
 
 class RecipeDetailSerializer(RecipeSerializer):
     class Meta(RecipeSerializer.Meta):
-        fields = RecipeSerializer.Meta.fields + ['description']
+        fields = RecipeSerializer.Meta.fields + ['description', 'image']
+        # image추가했더니 get보낼때 image field 도 나온다
         
 
 class RecipeImageSerializer(serializers.ModelSerializer):

@@ -1,6 +1,8 @@
 """
 테그 테스트를 위한 api 테스트
 """
+from decimal import Decimal
+
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from django.test import TestCase
@@ -8,7 +10,7 @@ from django.test import TestCase
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from core.models import Tag
+from core.models import (Tag, Recipe)
 from recipe.serializers import (
     TagSerializer,
 )
@@ -100,4 +102,46 @@ class PrivateTagsApiTests(TestCase):
         self.assertFalse(tags.exists())
 
 
+    def test_filter_tags_assigned_to_recipes(self):
+        """Test listing tags by those assigned to recipes."""
+        tag1 = Tag.objects.create(user=self.user, name='Breakfast')
+        tag2 = Tag.objects.create(user=self.user, name='Lunch')
+        recipe = Recipe.objects.create(
+            title='Green Eggs on Toast',
+            time_minutes=10,
+            price=Decimal('2.50'),
+            user=self.user,
+        )
+        recipe.tags.add(tag1)
+
+        res = self.client.get(TAGS_URL, {'assigned_only': 1})
+        # tag2는 할당되지 않았는데 그거 잘걸려내는지 확인
+
+        s1 = TagSerializer(tag1)
+        s2 = TagSerializer(tag2)
+        self.assertIn(s1.data, res.data)
+        self.assertNotIn(s2.data, res.data)
+
+    def test_filtered_tags_unique(self):
+        """필터 결과가 중복된거 주지않는지 검사"""
+        tag = Tag.objects.create(user=self.user, name='Breakfast')
+        Tag.objects.create(user=self.user, name='Dinner')
+        recipe1 = Recipe.objects.create(
+            title='Pencakes',
+            time_minutes=5,
+            price=Decimal('5.00'),
+            user=self.user,
+        )
+        recipe2 = Recipe.objects.create(
+            title='Porridge',
+            time_minutes=3,
+            price=Decimal('2.00'),
+            user=self.user,
+        )
+        recipe1.tags.add(tag)
+        recipe2.tags.add(tag)
+
+        res = self.client.get(TAGS_URL, {'assigned_only': 1})
+        # Dinner은 할당되지 않았는데 그게맞는지 검사
+        self.assertEqual(len(res.data), 1)
 
