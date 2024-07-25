@@ -17,7 +17,7 @@ def recipe_image_file_path(instance, filename):
 	ext = os.path.splitext(filename)[1]
 	filename = f'{uuid.uuid4()}{ext}'
 
-	return os.path.join('uploads', 'recipe', filename)
+	return os.path.join('static', 'recipe', filename)
 
 
 # 유저 모델을 만들었으니 유저모델 매니저를 만들어보겠다 
@@ -77,7 +77,7 @@ class Recipe(models.Model):
 	title = models.CharField(max_length=255)
 	description = models.TextField(blank=True)
 	time_minutes = models.IntegerField()
-	price = models.DecimalField(max_digits=5, decimal_places=2)
+	price = models.DecimalField(max_digits=8, decimal_places=2)
 	link = models.CharField(max_length=255, blank=True)
 	tags = models.ManyToManyField('Tag')
 	ingredients = models.ManyToManyField('Ingredient')
@@ -100,8 +100,7 @@ class Tag(models.Model):
 class Ingredient(models.Model):
 	name = models.CharField(max_length=255)
 	user = models.ForeignKey(
-		settings.AUTH_USER_MODEL, 
-		# settings.py에 AUTH_USER_MODEL = 'core.User' 코어모델쓰겠다는뜻
+		settings.AUTH_USER_MODEL, # settings.py에 AUTH_USER_MODEL = 'core.User' 코어모델쓰겠다는뜻
 		on_delete=models.CASCADE,
 	)
 

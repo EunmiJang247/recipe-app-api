@@ -12,19 +12,21 @@ from django.utils.translation import gettext as _
 from rest_framework import serializers
 
 class UserSerializer(serializers.ModelSerializer):
-    # serializers.ModelSerializer를 상속
+    # ModelSerializer: 모델의 필드를 자동으로 직렬화하고 역직렬화하는 기능을 제공
 
-    class Meta:
-        # Meta 클래스 내부에서는 해당 시리얼라이저가 어떤 모델을 기반으로 동작할지 설정합니다
+    class Meta: #Meta: 직렬화할 모델과 필드 목록이 포함됨
         model = get_user_model()
         '''
         get_user_model() 함수는 Django의 django.contrib.auth 
         모듈에서 제공하는 get_user_model() 함수입니다.
-        이 함수는 현재 프로젝트에서 사용 중인 사용자 
-        모델을 반환합니다.
+        이 함수는 현재 프로젝트에서 사용 중인 사용자 모델을 반환합니다.
         '''
         fields = ['email', 'password', 'name']
         extra_kwargs = {'password': {'write_only': True, 'min_length': 5}}
+        '''
+        write_only=True: 이 필드는 쓰기 작업(예: 객체 생성 또는 업데이트)에서만 사용되고, 
+        읽기 작업(예: 객체 조회)에서는 제외됩니다. 즉, JSON 응답에는 포함되지 않습니다
+        '''
 
     def create(self, validated_data):
         # post요청을 보내면 이게 호출됨
@@ -43,10 +45,10 @@ class UserSerializer(serializers.ModelSerializer):
         return user
     
 class AuthTokenSerializer(serializers.Serializer):
-    email = serializers.EmailField()
+    email = serializers.EmailField() # 유효한 이메일 형식인지 확인
     password = serializers.CharField(
         style={'input_type': 'password'}, 
-        trim_whitespace=False
+        trim_whitespace=True
     )
 
     def validate(self, attrs):
@@ -63,4 +65,5 @@ class AuthTokenSerializer(serializers.Serializer):
             raise serializers.ValidationError(msg, code='authorization')
         
         attrs['user'] = user
+        # attrs['user'] = user: 인증에 성공한 경우, attrs 사전에 user 객체를 추가합니다
         return attrs

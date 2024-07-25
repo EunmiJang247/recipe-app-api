@@ -22,7 +22,6 @@ class TagSerializer(serializers.ModelSerializer):
         read_only_fields = ['id'] # 읽기 전용
 
 class RecipeSerializer(serializers.ModelSerializer):
-    # Tag시리얼라이저랑 잇기 위해 선언
     tags = TagSerializer(many=True, required=False)
     ingredients = IngredientSerializer(many=True, required=False)
 
@@ -33,12 +32,17 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def _get_or_create_tags(self, tags, recipe):
         auth_user = self.context['request'].user
+        # 현재 요청을 보낸 인증된 사용자를 가져옵니다
         for tag in tags:
-            tag_obj, created = Tag.objects.get_or_create( # 이미 있으면 get없으면 crate해주는애.
+            tag_obj, created = Tag.objects.get_or_create( # 이미 있으면 get없으면 create.
+                # tag_obj: 가져오거나 생성된 태그 객체
+                # created: 태그가 새로 생성되었는지 여부를 나타내는 불리언 값입니다
                 user=auth_user,
                 **tag, # name=tag['name']할수도있지만 나중에 필드가 추가될수있으니까
             )
             recipe.tags.add(tag_obj)
+            # recipe.tags.add(tag_obj) 부분은 태그 객체(tag_obj)를 레시피 객체(recipe)의 tags 필드에 추가하기 위해 사용됩니다.
+            # 이 과정은 다대다 관계(Many-to-Many)를 설정하기 위한 것입니다
 
     def _get_or_create_ingredients(self, ingredients, recipe):
         auth_user = self.context['request'].user
@@ -53,7 +57,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         tags = validated_data.pop('tags', []) #tag에 있는거를 제거하고 tags에 저장.
         ingredients = validated_data.pop('ingredients', [])
         recipe = Recipe.objects.create(**validated_data)
-        # 따로따로 다른 modl에 저장해야 하니까 분리함. 
+        # 따로따로 다른 model에 저장해야 하니까 분리함. 
         self._get_or_create_tags(tags, recipe)
         self._get_or_create_ingredients(ingredients, recipe)
 
@@ -84,9 +88,9 @@ class RecipeSerializer(serializers.ModelSerializer):
 
 
 class RecipeDetailSerializer(RecipeSerializer):
+    # 이 클래스는 RecipeSerializer를 상속받아 추가 필드를 포함하도록 확장된 직렬화 클래스
     class Meta(RecipeSerializer.Meta):
         fields = RecipeSerializer.Meta.fields + ['description', 'image']
-        # image추가했더니 get보낼때 image field 도 나온다
         
 
 class RecipeImageSerializer(serializers.ModelSerializer):
@@ -94,5 +98,10 @@ class RecipeImageSerializer(serializers.ModelSerializer):
     class Meta:
         model=Recipe
         fields=['id', 'image']
+        # 이 시리얼라이저를 통해 Recipe 모델의 id와 image 필드만 직렬화되거나 역직렬화됩니다
         read_only_fields = ['id']
+        # 이 필드는 읽기 전용으로 설정됩니다.
+        # 즉, 클라이언트가 id 필드를 수정할 수 없으며, 응답에서만 이 필드를 볼 수 있습니다.
         extra_kwargs = {'image': {'required': 'True'}}
+        # {'required': 'True'}는 image 필드가 필수임을 나타냅니다. 
+        # 따라서 이미지가 업로드되지 않으면 유효성 검사에서 오류가 발생합니다
