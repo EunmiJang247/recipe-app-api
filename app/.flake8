@@ -1,8 +1,0 @@
-[flake8]
-; 린팅 실행할 때 아래 파일들은 빼줘~ 내가 코딩한것만 검사하면돼
-exclude =
-    migrations,
-    __pycache__,
-    manage.py,
-    settings.py
-

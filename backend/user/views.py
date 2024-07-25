@@ -14,7 +14,10 @@ from user.serializers import (
 )
 
 class CreateUserView(generics.CreateAPIView):
+    # CreateUserView는 새로운 사용자를 생성하는 API 엔드포인트를 제공
+    # POST 요청을 처리하여 새로운 객체를 생성하는 기능을 제공
     serializer_class = UserSerializer
+    # UserSerializer는 사용자 데이터를 검증하고, 새로운 사용자 객체를 생성하는 역할
 
 class CreateTokenView(ObtainAuthToken):
     serializer_class = AuthTokenSerializer # 아이디로 이메일을 사용하기 위해 선언

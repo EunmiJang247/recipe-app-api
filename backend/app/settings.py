@@ -40,16 +40,20 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'core',
     'rest_framework',
-    'rest_framework.authtoken',
+    'rest_framework.authtoken', 
+    # Django REST framework에서 기본 제공하는 토큰 기반 인증을 사용하기 위해 추가
+    # 각 사용자에게 고유한 토큰을 발급하고, 이를 통해 API 요청 시 인증을 간단하게 처리할 수 있습니다. 일반적으로 로그인 시 토큰을 발급하고, 이후 모든 API 요청에 이 토큰을 포함시켜 인증을 수행합니다
     'drf_spectacular',
+    # Django REST framework 기반의 API 문서를 자동으로 생성하는 도구입니다. OpenAPI 3.0 사양을 기반으로 문서를 생성하여, 개발자 및 클라이언트가 API의 구조와 사용법을 쉽게 이해할 수 있게 합니다
     'user',
     'recipe',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -82,11 +86,12 @@ WSGI_APPLICATION = 'app.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'HOST': os.environ.get('DB_HOST'),
+        'ENGINE': 'django.contrib.gis.db.backends.mysql',
+        'HOST': 'host.docker.internal',
+        # 'HOST': os.environ.get('DB_HOST'),
         'NAME': os.environ.get('DB_NAME'),
         'USER': os.environ.get('DB_USER'),
-        'PASSWORD': os.environ.get('DB_PASS'),
+        'PASSWORD': os.environ.get('DB_PW'),
     }
 }
 
@@ -127,11 +132,16 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
-STATIC_URL = '/static/static/'
-MEDIA_URL = '/static/media/'
+# STATIC_URL = '/static/static/'
+# MEDIA_URL = '/static/media/'
 
-MEDIA_ROOT = '/vol/static/media'
-STATIC_ROOT = '/vol/web/static'
+# MEDIA_ROOT = '/vol/static/media'
+# STATIC_ROOT = '/vol/web/static'
+
+STATIC_URL = '/static_backend/'
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field

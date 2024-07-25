@@ -1,41 +1,75 @@
-version: "3.9" 
-# 도커의 버전.
+# version: "3.9" 
+# # 도커의 버전.
 
-services:
-  app:
-    build:
-      context: .
-      # 현재 파일을 빌드하겠다. 
-      args:
-        - DEV=true
-    ports:
-      - "8000:8000"
-      # 로컬 컴퓨터의 8000은 도커의 8000으로 이어진다
-    volumes:
-      - ./app:/app
-      # 코드를 변경할때마다 컨테이너를 새로만들지 않기 위함.
-      - dev-static-data:/vol/web
-    command: >
-      sh -c "python manage.py wait_for_db &&
-             python manage.py migrate &&
-             python manage.py runserver 0.0.0.0:8000"
-    environment:
-      - DB_HOST=db
-      - DB_NAME=devdb
-      - DB_USER=devuser
-      - DB_PASS=changeme
-    depends_on:
-      - db
+# services:
+#   app:
+#     build:
+#       context: .
+#       # 현재 파일을 빌드하겠다. 
+#       args:
+#         - DEV=true
+#     ports:
+#       - "8000:8000"
+#       # 로컬 컴퓨터의 8000은 도커의 8000으로 이어진다
+#     volumes:
+#       - ./app:/app
+#       # 코드를 변경할때마다 컨테이너를 새로만들지 않기 위함.
+#       - dev-static-data:/vol/web
+#     command: >
+#       sh -c "python manage.py wait_for_db &&
+#              python manage.py migrate &&
+#              python manage.py runserver 0.0.0.0:8000"
+#     environment:
+#       - DB_HOST=db
+#       - DB_NAME=devdb
+#       - DB_USER=devuser
+#       - DB_PASS=changeme
+#     depends_on:
+#       - db
 
-  db: 
-    image: postgres:13-alpine
-    volumes:
-      - dev-db-data:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_DB=devdb
-      - POSTGRES_USER=devuser
-      - POSTGRES_PASSWORD=changeme
+#   db: 
+#     image: postgres:13-alpine
+#     volumes:
+#       - dev-db-data:/var/lib/postgresql/data
+#     environment:
+#       - POSTGRES_DB=devdb
+#       - POSTGRES_USER=devuser
+#       - POSTGRES_PASSWORD=changeme
   
-volumes:
-  dev-db-data:
-  dev-static-data:
+# volumes:
+#   dev-db-data:
+#   dev-static-data:
+
+
+version: '3.7'
+services:
+  backend:
+    # 서비스 이름 정의
+    build: ./backend
+    # ./backend 디렉토리에서 Dockerfile을 찾아서 이 서비스를 빌드
+    ports:
+      - 8010:8000
+      # 호스트의 포트 8005를 컨테이너의 포트 8000에 매핑
+    volumes:
+      - ./backend:/usr/src/app
+    restart: always
+    ipc: host
+    # ipc: host: IPC(Inter-Process Communication) 네임스페이스를 호스트와 공유합니다. 이는 컨테이너와 호스트 간의 메모리 공유나 프로세스 간 통신을 허용
+    environment:
+      - DB_HOST=localhost
+      - DB_NAME=recipe
+      - DB_USER=root
+      - DB_PW=dmsal369
+      - EXPORT_HOST=localhost
+      - EXPORT_PORT=90
+      - TZ=Asia/Seoul
+    command: python manage.py runserver 0.0.0.0:8000
+
+  revers_proxy:
+    build: ./nginx
+    ports:
+      - 90:80
+    depends_on:
+      - backend
+      # - frontend
+    restart: always
